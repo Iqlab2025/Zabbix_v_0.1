@@ -105,3 +105,25 @@ export async function getAllLicenses(req, res) {
     res.status(500).json({ message: 'Server error' });
   }
 }
+
+//Delete Licenses
+
+// Delete license by licenseKey
+export async function deleteLicense(req, res) {
+  try {
+    const { licenseKey } = req.params;
+
+    const deleted = await License.findOneAndDelete({ licenseKey });
+
+    if (!deleted) {
+      return res.status(404).json({ message: 'License not found' });
+    }
+
+    res.json({ message: 'License deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting license:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+
