@@ -10,6 +10,12 @@ const licenseSchema = new Schema({
     type: String,
     required: true,
   },
+  email: { // 👈 New field added here
+    type: String,
+    required: true,
+    lowercase: true,
+    match: [/.+@.+\..+/, 'Please enter a valid email address']
+  },
   status: {
     type: String,
     enum: ['active', 'inactive', 'expired'],
