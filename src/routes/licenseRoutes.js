@@ -5,13 +5,15 @@ import {
   checkLicense,
   generateLicense,
   getAllLicenses,
-  deleteLicense
+  deleteLicense,
+  updateLicense
 } from '../controllers/licenseController.js';
 
 router.get('/check-license/:licenseKey', checkLicense);
 router.post('/generate-license', generateLicense);
 router.get('/all-licenses', getAllLicenses); 
 router.delete('/license/:licenseKey', deleteLicense); // ✅ This line is required
+router.patch('/update-license/:licenseKey', updateLicense); // ✅ This line is required
 
 
 export default router;

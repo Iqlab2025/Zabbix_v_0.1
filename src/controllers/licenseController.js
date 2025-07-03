@@ -126,4 +126,35 @@ export async function deleteLicense(req, res) {
   }
 }
 
+// Update license by licenseKey
+export async function updateLicense(req, res) {
+  try {
+    const { licenseKey } = req.params;
+    const cleanKey = licenseKey.trim();
+    const { expiryDate, status } = req.body;
+
+    const updateData = {};
+    if (expiryDate) updateData.expiryDate = new Date(expiryDate);
+    if (status) updateData.status = status;
+
+    const updatedLicense = await License.findOneAndUpdate(
+      { licenseKey },
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updatedLicense) {
+      return res.status(404).json({ message: 'License not found' });
+    }
+
+    res.json({
+      message: 'License updated successfully',
+      license: updatedLicense,
+    });
+  } catch (error) {
+    console.error('Error updating license:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
 
