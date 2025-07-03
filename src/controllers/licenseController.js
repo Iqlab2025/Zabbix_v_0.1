@@ -31,6 +31,7 @@ export async function checkLicense(req, res) {
       clientId: license.clientId,
       expiryDate: license.expiryDate,
       hmac,
+      email: license.email, // Include email in the response
     });
   } catch (error) {
     console.error('License validation error:', error);
