@@ -43,10 +43,10 @@ export async function checkLicense(req, res) {
 // Generate or retrieve a license (for admin use)
 export async function generateLicense(req, res) {
   try {
-    const { clientId, expiryDate, email } = req.body;
+    const { clientId, expiryDate, email, product } = req.body;
 
-    if (!clientId || !expiryDate || !email) {
-      return res.status(400).json({ message: 'clientId, expiryDate, and email are required' });
+    if (!clientId || !expiryDate || !email || !product) {
+      return res.status(400).json({ message: 'clientId, expiryDate, email, and product are required' });
     }
 
     // Try to find existing active, non-expired license
@@ -90,6 +90,7 @@ export async function generateLicense(req, res) {
       expiryDate: new Date(expiryDate),
       status: 'active',
       email,
+      product,
 
     });
     await license.save();
