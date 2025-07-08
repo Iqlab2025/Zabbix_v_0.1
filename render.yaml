@@ -1,8 +1,9 @@
 services:
   - type: web
     name: doodleanetwork-api
-    env: node
+    runtime: node
     plan: free
+    repo: https://github.com/Iqlab2025/Zabbix_v_0.1.git
     buildCommand: npm install
     startCommand: node server.js
     envVars:
@@ -21,7 +22,8 @@ services:
 
   - type: cron
     name: check-license-expiry
-    env: node
+    runtime: node
+    repo: https://github.com/Iqlab2025/Zabbix_v_0.1.git
     buildCommand: npm install
     startCommand: node jobs/checkExpiringLicenses.js
     schedule: "0 8 * * *" # every day at 8 AM UTC
