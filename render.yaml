@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: doodleanetwork-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://vrishabrayu:iqlab%402025@nms1.3vmrs1q.mongodb.net/zabbix-license?retryWrites=true&w=majority&appName=NMS1
+      - key: HMAC_SECRET
+        value: 123456
+      - key: EMAIL_USER
+        value: user.compliance@identiqa.tech
+      - key: EMAIL_PASS
+        value: nrqfbbgmtdqnsmvb
+      - key: SMTP_HOST
+        value: smtp.office365.com
+      - key: SMTP_PORT
+        value: 587
+
+  - type: cron
+    name: check-license-expiry
+    env: node
+    buildCommand: npm install
+    startCommand: node jobs/checkExpiringLicenses.js
+    schedule: "0 8 * * *" # every day at 8 AM UTC
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://vrishabrayu:iqlab%402025@nms1.3vmrs1q.mongodb.net/zabbix-license?retryWrites=true&w=majority&appName=NMS1
+      - key: HMAC_SECRET
+        value: 123456
+      - key: EMAIL_USER
+        value: user.compliance@identiqa.tech
+      - key: EMAIL_PASS
+        value: nrqfbbgmtdqnsmvb
+      - key: SMTP_HOST
+        value: smtp.office365.com
+      - key: SMTP_PORT
+        value: 587
