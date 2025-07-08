@@ -31,7 +31,8 @@ export async function checkLicense(req, res) {
       clientId: license.clientId,
       expiryDate: license.expiryDate,
       hmac,
-      email: license.email, // Include email in the response
+      email: license.email, 
+      instanceId: license.instanceId,
     });
   } catch (error) {
     console.error('License validation error:', error);
@@ -51,6 +52,10 @@ export async function generateLicense(req, res) {
     // Try to find existing active, non-expired license
     let license = await License.findOne({ clientId, status: 'active' });
     if (license) {
+      if (!license.instanceId) {
+        license.instanceId = randomBytes(16).toString('hex');
+        await license.save();
+      }
       if (new Date() < new Date(license.expiryDate)) {
         const data = `${license.licenseKey}|${license.clientId}|${new Date(license.expiryDate).toISOString()}`;
         const hmac = createHmac('sha256', process.env.HMAC_SECRET)
@@ -58,6 +63,7 @@ export async function generateLicense(req, res) {
           .digest('hex');
         return res.json({
           licenseKey: license.licenseKey,
+          instanceId: license.instanceId,
           clientId: license.clientId,
           expiryDate: license.expiryDate,
           hmac,
@@ -70,6 +76,7 @@ export async function generateLicense(req, res) {
 
     // Create a new license
     const licenseKey = randomBytes(16).toString('hex');
+    const instanceId = randomBytes(16).toString('hex');
     const isoExpiry = new Date(expiryDate).toISOString();
     const data = `${licenseKey}|${clientId}|${isoExpiry}`;
     const hmac = createHmac('sha256', process.env.HMAC_SECRET)
@@ -78,6 +85,7 @@ export async function generateLicense(req, res) {
 
     license = new License({
       licenseKey,
+      instanceId,
       clientId,
       expiryDate: new Date(expiryDate),
       status: 'active',
@@ -88,6 +96,7 @@ export async function generateLicense(req, res) {
 
     res.status(201).json({
       licenseKey,
+      instanceId,
       clientId,
       expiryDate,
       hmac,
@@ -161,3 +170,46 @@ export async function updateLicense(req, res) {
 }
 
 
+// POST /api/check-license (new version using both licenseKey + instanceId)
+export async function checkLicensePost(req, res) {
+  try {
+    const { licenseKey, instanceId } = req.body;
+
+    if (!licenseKey || !instanceId) {
+      return res.status(400).json({ valid: false, message: 'licenseKey and instanceId are required' });
+    }
+
+    const license = await License.findOne({ licenseKey, instanceId });
+
+    if (!license) {
+      return res.status(404).json({ valid: false, message: 'License not found for this instance' });
+    }
+
+    if (license.status === 'inactive') {
+      return res.status(400).json({ valid: false, message: 'License is inactive' });
+    }
+
+    if (new Date() > new Date(license.expiryDate) || license.status === 'expired') {
+      await License.updateOne({ licenseKey }, { status: 'expired' });
+      return res.status(400).json({ valid: false, message: 'License has expired' });
+    }
+
+    // HMAC with instanceId
+    const expiryISO = new Date(license.expiryDate).toISOString();
+    const data = `${licenseKey}|${instanceId}|${expiryISO}`;
+    const hmac = createHmac('sha256', process.env.HMAC_SECRET)
+      .update(data)
+      .digest('hex');
+
+    return res.json({
+      valid: true,
+      clientId: license.clientId,
+      instanceId: license.instanceId,
+      expiryDate: expiryISO,
+      hmac,
+    });
+  } catch (error) {
+    console.error('POST License validation error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}

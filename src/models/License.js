@@ -6,6 +6,11 @@ const licenseSchema = new Schema({
     required: true,
     unique: true,
   },
+  instanceId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   clientId: {
     type: String,
     required: true,

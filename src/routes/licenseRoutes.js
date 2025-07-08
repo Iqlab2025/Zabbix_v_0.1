@@ -2,18 +2,21 @@
 import { Router } from 'express';
 const router = Router();
 import {
-  checkLicense,
+  checkLicensePost,
   generateLicense,
   getAllLicenses,
   deleteLicense,
-  updateLicense
+  updateLicense,
+  checkLicense
 } from '../controllers/licenseController.js';
 
 router.get('/check-license/:licenseKey', checkLicense);
+router.post('/check-license', checkLicensePost); // ← ✅ New POST version
+
 router.post('/generate-license', generateLicense);
-router.get('/all-licenses', getAllLicenses); 
-router.delete('/license/:licenseKey', deleteLicense); // ✅ This line is required
-router.patch('/update-license/:licenseKey', updateLicense); // ✅ This line is required
+router.get('/all-licenses', getAllLicenses);
+router.delete('/delete-license/:licenseKey', deleteLicense);
+router.put('/update-license/:licenseKey', updateLicense); // ✅ This line is required
 
 
 export default router;
